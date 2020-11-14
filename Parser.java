@@ -23,8 +23,8 @@ public class Parser {
      * <p>
      * eg. “cp requires 2 arguments”
      *
-     * @param input
-     * @return
+     * @param input user cmd
+     * @return true or false in case cmd or its args is invalid
      */
 
     public boolean parse(String input) {
@@ -32,7 +32,6 @@ public class Parser {
         boolean flag = true;
         //spilt the given string to its components
         String[] part = input.split("\\s+");
-        // for(int i=0;i<part.length;i++) {}
         //checking if the given command and args is valid by if conditions
         //if the first word of the string is a cmd it will check if the args of this cmd is valid
         if (part[0].equals("date")) {
@@ -42,7 +41,6 @@ public class Parser {
                 flag = false;
                 System.out.println("invalid");
             }
-            return flag;
         }
         else if (part[0].equals("args")) {
             cmd = part[0];
@@ -51,7 +49,6 @@ public class Parser {
                 System.out.println("invalid");
 
             }
-            return flag;
         }
         else if (part[0].equals("pwd")) {
             cmd = part[0];
@@ -59,7 +56,6 @@ public class Parser {
                 flag = false;
                 System.out.println("invalid");
             }
-            return flag;
         }
         else if (part[0].equals("rm")) {
             cmd = part[0];
@@ -71,7 +67,6 @@ public class Parser {
                 flag = false;
                 System.out.println("invalid");
             }
-            return flag;
         }
         else if (part[0].equals("mv")) {
             //takes 1 arg otherwise invalid
@@ -85,14 +80,17 @@ public class Parser {
         }
         else if (part[0].equals("rmdir")) {
             cmd = part[0];
+            //takes []args otherwise invalid
             if (1 < part.length) {
-                args = new String[]{part[1]};
+                args = new String[part.length];
+                for (int j = 0; j < (part.length) - 1; j++) {
+                    args[j] = part[j + 1];
+                }
             }
-            if (2 < part.length || args == null) {
+            if (args == null) {
                 flag = false;
                 System.out.println("invalid");
             }
-            return flag;
         }
         else if (part[0].equals("mkdir")) {
             cmd = part[0];
@@ -103,7 +101,6 @@ public class Parser {
                 flag = false;
                 System.out.println("invalid");
             }
-            return flag;
         }
         else if (part[0].equals("more")) {
             cmd = part[0];
@@ -114,7 +111,6 @@ public class Parser {
                 flag = false;
                 System.out.println("invalid");
             }
-            return flag;
         }
         else if (part[0].equals("cat")) {
             cmd = part[0];
@@ -129,7 +125,6 @@ public class Parser {
                 flag = false;
                 System.out.println("invalid");
             }
-
         }
         else if (part[0].equals("cp")) {
             if (2 < part.length) {
@@ -149,7 +144,6 @@ public class Parser {
                 flag = false;
                 System.out.println("invalid");
             }
-            return flag;
         }
        else if (part[0].equals("cd")) {
             cmd = part[0];
@@ -161,7 +155,6 @@ public class Parser {
                 flag = false;
                 System.out.println("invalid");
             }
-            return flag;
         }
        else if (part[0].equals("help")) {
             cmd = part[0];
@@ -169,8 +162,7 @@ public class Parser {
                 flag = false;
                 System.out.println("invalid");
 
-            }
-            return flag; }
+            } }
        //unknown cmd
        else
         {
@@ -178,7 +170,8 @@ public class Parser {
             System.out.println("invalid");
         }
 
-        return flag;}
+        return flag;
+    }
 
 
 
