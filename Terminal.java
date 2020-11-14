@@ -26,12 +26,13 @@ public class Terminal{
         System.out.println();
     }
 
-    public void rmdir (String sourcePath)
+    public void rmdir (String []sourcePath)
     {
-        File path = new File(sourcePath);
+        for(int i=0;i<sourcePath.length;i++){
+        File path = new File(sourcePath[i]);
         //delete folder if exist and empty
         if(!path.delete()){
-            System.out.println("invalid directory");}
+            System.out.println("invalid directory");}}
     }
 
     public void date ()
