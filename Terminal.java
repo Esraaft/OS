@@ -1,6 +1,14 @@
 package com.company;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,54 +17,51 @@ import java.util.Date;
 import java.util.Scanner;
 
 
-// Interface for com.company.Terminal
-public class Terminal{
-
-    public void ls(String sourcePath) throws IOException {
+public class Terminal {
+    public static void ls() throws IOException {
         //i redeclare the string of sourcepath as a path to use it in DirectoryStream;
+        String sourcePath=Terminal.srcPath;
         Path path = Paths.get(sourcePath);
         //declare object of type DirectoryStream to iterate ove directories
         DirectoryStream<Path> data;
         data = Files.newDirectoryStream(path);
+        //String[] files = null;
+        //int counter=0;
         for (Path file : data)
         {
             //printing name of file
             System.out.print(file.getFileName()+"  ");
+            //files[counter]=file.toString();
+            // counter++;
         }
         System.out.println();
     }
 
-    public void rmdir (String []sourcePath)
+    public static void rmdir (String sourcePath)
     {
-        for(int i=0;i<sourcePath.length;i++){
-        File path = new File(sourcePath[i]);
+        File path = new File(sourcePath);
         //delete folder if exist and empty
         if(!path.delete()){
-            System.out.println("invalid directory");}}
+            System.out.println("invalid directory");}
     }
 
-    public void date ()
+    public static void date ()
     {
         //printing date
         Date date = new Date();
         System.out.println(date.toString());
     }
 
-    public void clear() {
+    public static void clear() {
         //clear terminal
         System.out.print("\033[H\033[2J");
     }
 
-    public void pipe(String[] command)
-    {
-
-    }
 
     //Print Working Directory
     public static void pwd() {
         //the current direction
-        String PWD = System.getProperty("user.dir");
-        System.out.println(PWD);
+        System.out.println(Terminal.srcPath);
     }
     //Remove file
     public static void rm(String fileYouWantToDel){
@@ -64,19 +69,27 @@ public class Terminal{
         File file = new File(fileYouWantToDel);
         //check if Directory
         if(file.isDirectory()){
-            System.out.println("rm: cannot remove "+file+": Is a directory");
+            // System.out.println("rm: cannot remove "+file+": Is a directory");
+            Terminal.deleteFolder(file);
         }
         else{
-            System.out.println(file.isFile());
             if(file.isFile() ){file.delete();}
             else { System.out.println("rm: cannot remove "+file+": No such file or directory"); }
-
         }
-
+    }
+    static void deleteFolder(File file){
+        for (File subFile : file.listFiles()) {
+            if(subFile.isDirectory()) {
+                deleteFolder(subFile);
+            } else {
+                subFile.delete();
+            }
+        }
+        file.delete();
     }
     //Read and print text files
-    public static void readPrintTextFiles(String textFile) throws FileNotFoundException {
-        File file = new File(textFile);
+    public static void readPrintTextFiles(String textFile) throws FileNotFoundException, IOException {
+        File file = new File(Terminal.srcPath,textFile);
         if(file.isDirectory()){
             System.out.println("cat: "+ file+" : Is a directory");
         }
@@ -92,28 +105,27 @@ public class Terminal{
         }
     }
     //concatenate files
-    public static void cat(String[] fileYouWantToCat) throws FileNotFoundException {
+    public static void cat(String[] fileYouWantToCat) throws FileNotFoundException ,IOException{
         for (int i=0;i<fileYouWantToCat.length;i++) {
             readPrintTextFiles(fileYouWantToCat[i]);
         }
     }
+
     public static void cp(String sourcePath, String destinationPath ) throws FileNotFoundException, IOException{
         File dest=new File(destinationPath);
         destinationPath+="\\";
         if(dest.isDirectory()) {
             String temp="";
             for(int i=sourcePath.length()-1;i>0;i--) {
-                if(sourcePath.charAt(i)=='/') {
+                if(sourcePath.charAt(i)=='\\') {
                     break;}
                 else {
                     temp+=sourcePath.charAt(i);
                 }
             }
-
             for(int i=temp.length()-1;i>=0;i--) {
                 destinationPath+=temp.charAt(i);
             }
-
         }
         InputStream in = null;
         OutputStream out = null;
@@ -145,7 +157,7 @@ public class Terminal{
                 out.close();
             }
         }
-        System.out.println("File copied from " + sourcePath + " to " + destinationPath);
+        // System.out.println("File copied from " + sourcePath + " to " + destinationPath);
     }
     public static void mv(String sourcePath, String destinationPath)throws IOException {
         //we will move the file by copying it to the destination and then deleting the original file
@@ -201,28 +213,155 @@ public class Terminal{
                 " hash [-lr] [-p pathname] [-dt] [name >  while COMMANDS; do COMMANDS; done\r\n" +
                 " help [-dms] [pattern ...]               { COMMANDS ; }");
     }
-    /*public  static  void RedirectOperator(String OutPut,String cmd,String[] string) throws IOException {
-        File myObj = new File(OutPut);
-        if (myObj.createNewFile()) {
-            System.out.println("File created: " + myObj.getName());
-            FileWriter myWriter = new FileWriter(OutPut);
-            myWriter.append(cmd);
-            myWriter.close();
-            System.out.println("Successfully wrote to the file.");
-        } else {
 
-            System.out.println("File already exists.");
-            BufferedWriter out = new BufferedWriter(
-                    new FileWriter(OutPut, true));
-            out.write(cmd);
-            out.close();
-            System.out.println("Successfully wrote to the file.");
+    public static String srcPath="C:\\"; // start directory from here
+
+    public static void cd(String argument) {
+
+        if (argument == null) {     // if there is no args
+            argument = srcPath;
+        }
+
+        File f1=new File (argument);
+
+        if(f1.isDirectory()){
+         srcPath=f1.getAbsolutePath();
+         }
+
+        else{
+          File File = new File(srcPath);
+             if (argument.charAt(0) == '.' && argument.charAt(1) == '/') {// to handel argument like ./Documents
+                argument = srcPath + argument.substring(1, argument.length());
+            }
+            else {
+                argument = srcPath + argument;
+            }
+
+            for (int i = 0; i < File.listFiles().length; i++) {
+                // System.out.println(File.listFiles()[i]);
+                if (File.listFiles()[i].getName().equals(argument))
+                    return;
+            }
+
+            File newFile = new File(argument);
+            if (!newFile.isDirectory())
+            // without this block if the path not found it creates new directory
+            {
+                newFile = new File(srcPath);
+            }
+            srcPath = newFile.getAbsolutePath();
+        }
+
+    }
+
+
+    public static void more(String fileName) {
+        File file = new File( srcPath, fileName);
+        if (file.exists()) {
+            try {
+                FileInputStream input = new FileInputStream(file);
+                BufferedReader br = new BufferedReader(new InputStreamReader(input));
+                String line;
+                int numOfLines=0;
+                int numL=0;
+                String Choice ;
+                while ((line = br.readLine()) != null) {
+                    numL++;
+                }
+                System.out.println(numL);
+
+                Scanner fileReader = new Scanner(file);
+                while (fileReader.hasNextLine()) {
+                    line = fileReader.nextLine();
+                    System.out.println(line);
+                    if(numOfLines==20 ||numOfLines>20) {
+                        do {
+                            System.out.println("...More..." + (numOfLines % numL) + "%" + " Y or N??");
+                            Scanner in = new Scanner(System.in);
+                            Choice = in.nextLine();
+                        }while (Choice.equalsIgnoreCase("N"));
+
+
+                    }
+                    numOfLines++;
+                }
+                fileReader.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
 
+        else {
+            System.out.println("No such file with name "+fileName);
+        }
+    }
+    public static void  mkdir(String dirName)  {
+        try {
+            String folderName = srcPath + dirName;
+            Path directoryPath = Paths.get(folderName);
 
-    }*/
+            if (Files.exists(directoryPath)) {
+                System.out.println("Directory exists");
+            } else {
+                Files.createDirectory(directoryPath);
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
-// Add any other required command in the same structure….. 
+    public  static void args()
+    {
+        System.out.println("cd: [arg:destination Path]");
+        System.out.println("cd: [no arg] ");
+        System.out.println("ls: [no arg]");
+        System.out.println("ls: [] ");
+        System.out.println("cp: [arg1: File1 name] [arg2:file2 name]");
+        System.out.println("mv: [arg1:Src File] [arg2: dest file]");
+        System.out.println("mkdir: [arg: folder name or path]");
+        System.out.println("rmdir: [arg: folder name or path]");
+        System.out.println("more: [arg : file name]");
+        System.out.println("rm: [arg: file name]");
+        System.out.println("pipe: []");
+        System.out.println("<<: []");
+        System.out.println("<: []");
+        System.out.println("cat: [arg1: file name]");
+        System.out.println("cat: [arg1: file 1 name ] [arg2: file 2 name] ");
+        System.out.println("help: [no arg]");
+        System.out.println("args: [no arg]");
+        System.out.println("date: [no arg]");
+        System.out.println("pwd: [no arg]");
+        System.out.println("clear: [no arg]");
+
+
+
+    }
+
+    public static void main(String args[]) throws FileNotFoundException,IOException {
+        Scanner scanner = new Scanner(System.in);
+        String input="";
+        System.out.print(Terminal.srcPath+"> ");
+        input=scanner.nextLine();
+        while(true){
+            if(input.contentEquals("exit")) {
+                break;
+            }
+            else
+            {
+
+                Parser parser=new Parser();
+                if(!parser.parse(input)) {
+                    System.out.println("invalid");
+                }
+                System.out.print(Terminal.srcPath+"> ");
+                input=scanner.nextLine();
+            }
+        }
+    }
+
 }
